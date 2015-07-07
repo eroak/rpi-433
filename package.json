@@ -1,10 +1,14 @@
 {
-  "name": "rpi-rf433",
-  "version": "1.0.0",
+  "name": "rpi-433",
+  "version": "1.0.1",
   "description": "NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2",
   "main": "index.js",
   "dependencies": {
     "underscore": "^1.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:eroak/rpi-433.git"
   },
   "devDependencies": {},
   "scripts": {
