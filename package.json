@@ -1,0 +1,23 @@
+{
+  "name": "rpi-rf433",
+  "version": "1.0.0",
+  "description": "NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2",
+  "main": "index.js",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "cd src/ && make"
+  },
+  "keywords": [
+    "raspberry",
+    "433mhz",
+    "send",
+    "receive",
+    "nodejs"
+  ],
+  "author": "Fx",
+  "license": "ISC"
+}
