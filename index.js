@@ -29,12 +29,12 @@ var Sniffer = function(pin, debounceDelay) {
    */
   cmd.stdout.on('data', _.debounce(function (code) {
     
+    code = parseInt(code);
+    
     if(lastCodeSent == code) {
       lastCodeSent = null;
       return;
     }
-    
-    code = parseInt(code);
     
     self.emit('codes', code);
     self.emit(code);
