@@ -4,7 +4,7 @@ var _               = require('underscore'),
     exec            = require('child_process').exec,
     util            = require('util'),
     EventEmitter    = require('events').EventEmitter,
-    intercept       = true,
+    lastCodeSent    = null,
     snifferInstance = null;
 
 var scripts = {
@@ -29,7 +29,10 @@ var Sniffer = function(pin, debounceDelay) {
    */
   cmd.stdout.on('data', _.debounce(function (code) {
     
-    if(!intercept) return;
+    if(lastCodeSent == code) {
+      lastCodeSent = null;
+      return;
+    }
     
     code = parseInt(code);
     
@@ -62,11 +65,10 @@ module.exports = {
   sendCode: function (code, callback) {
     
     callback = callback || function () {};
-    intercept = false;
+    lastCodeSent = code;
     
     exec(path.join(__dirname, scripts.emit)+' '+code, function (error, stderr, stdout) {
       
-      intercept = true;
       callback(error, stderr, stdout);
       
     });
