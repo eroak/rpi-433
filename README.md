@@ -1,4 +1,7 @@
 # rpi-433
+
+[![NPM](https://nodei.co/npm/rpi-433.png?downloads=true)](https://nodei.co/npm/rpi-433/)
+
 NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2
 
 ### Dependencies
