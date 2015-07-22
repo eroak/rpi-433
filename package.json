@@ -1,6 +1,6 @@
 {
   "name": "rpi-433",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2",
   "main": "index.js",
   "dependencies": {
@@ -18,6 +18,7 @@
   "keywords": [
     "raspberry",
     "433mhz",
+    "sniffer",
     "send",
     "receive",
     "nodejs",
@@ -26,6 +27,6 @@
     "code",
     "wiringpi"
   ],
-  "author": "Eroak",
+  "author": "eroak",
   "license": "ISC"
 }
