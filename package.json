@@ -1,6 +1,6 @@
 {
   "name": "rpi-433",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "NodeJS module to send and receive decimal codes through 433Mhz device on RaspberryPI 2",
   "main": "index.js",
   "dependencies": {
@@ -26,7 +26,8 @@
     "radio",
     "code",
     "wiringpi",
-    "rc"
+    "rc",
+    "gpio"
   ],
   "author": {
     "name": "eroak",
