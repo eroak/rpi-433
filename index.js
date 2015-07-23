@@ -69,7 +69,7 @@ module.exports = {
     
     exec(path.join(__dirname, scripts.emit)+' '+code, function (error, stderr, stdout) {
       
-      callback(error, stderr, stdout);
+      callback(error, stdout);
       
     });
     
