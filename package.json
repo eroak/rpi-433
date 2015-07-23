@@ -28,6 +28,9 @@
     "wiringpi",
     "rc"
   ],
-  "author": "eroak",
+  "author": {
+    "name": "eroak",
+    "email": "mr.eroak@æmail.com"
+  },
   "license": "ISC"
 }
