@@ -18,11 +18,11 @@ var Sniffer = function(pin, debounceDelay) {
   
   EventEmitter.call(this);
   
-  pin = pin || 0;
+  pin = pin || 2;
   debounceDelay = debounceDelay || 500;
   
   var self = this;
-  var cmd = spawn(path.join(__dirname, scripts.read));
+  var cmd = spawn(path.join(__dirname, scripts.read), [pin]);
 
   /**
    * onCode
@@ -64,12 +64,12 @@ module.exports = {
   
   sendCode: function (code, callback) {
     
+    var pin = 0;
     callback = callback || function () {};
     lastCodeSent = code;
-    
-    exec(path.join(__dirname, scripts.emit)+' '+code, function (error, stderr, stdout) {
+    exec(path.join(__dirname, scripts.emit)+' '+pin+' '+code, function (error, stderr, stdout) {
       
-      callback(error, stdout);
+      callback(error, stderr, stdout);
       
     });
     

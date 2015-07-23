@@ -30,7 +30,7 @@ Firstly, make sure you are running your application as root or with sudo, else t
 sudo npm myscript.js
 ```
 
-Please note that there are different and confusing ways to reference a channel. This module supports wPi schema. Once wiringPi is installed, in your CLI you can run `gpio readall` and check the wPi column.
+Please note that there are different and confusing ways to reference a channel. This module supports wPi schema. Once wiringPi is installed, in your CLI you can run `gpio readall` and check the wPi column or consult https://projects.drogon.net/raspberry-pi/wiringpi/pins/
 
 ```bash
 gpio readall
