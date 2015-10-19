@@ -58,7 +58,7 @@ module.exports = {
 
     var defaults = {
       pin: 0,
-      callback: function defaultCallback(){};
+      callback: function defaultCallback(){}
     };
 
     switch(arguments.length) {
