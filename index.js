@@ -12,67 +12,88 @@ var scripts = {
   emit: 'build/codesend',
 };
 
-
-
 var Sniffer = function(pin, debounceDelay) {
-  
+
   EventEmitter.call(this);
-  
-  pin = pin || 2;
-  debounceDelay = debounceDelay || 500;
-  
+
   var self = this;
   var cmd = spawn(path.join(__dirname, scripts.read), [pin]);
 
-  /**
-   * onCode
-   */
   cmd.stdout.on('data', _.debounce(function (code) {
-    
+
     code = parseInt(code);
-    
+
     if(lastCodeSent == code) {
       lastCodeSent = null;
       return;
     }
-    
+
     self.emit('codes', code);
     self.emit(code);
-    
+
   }, debounceDelay, true));
 
-  /**
-   * onError
-   */
   cmd.stderr.on('data', function (error) {
 
     self.emit('error', error);
 
   });
-  
+
 };
 
 util.inherits(Sniffer, EventEmitter);
 
 module.exports = {
-  
-  sniffer: function () {
-    
-    return snifferInstance || (snifferInstance = new Sniffer());
-    
+
+  sniffer: function (pin, debounceDelay) {
+
+    pin = typeof pin !== 'undefined' ? pin : 2;
+    debounceDelay = typeof debounceDelay !== 'undefined' ? debounceDelay : 500;
+
+    return snifferInstance || (snifferInstance = new Sniffer(pin, debounceDelay));
+
   },
-  
-  sendCode: function (code, callback) {
-    
-    var pin = 0;
-    callback = callback || function () {};
+
+  sendCode: function (code, pin, callback) {
+
+    var defaults = {
+      pin: 0,
+      callback: function defaultCallback(){};
+    };
+
+    switch(arguments.length) {
+
+      case 1:
+
+        pin = defaults.pin;
+        callback = defaults.callback;
+
+      break;
+
+      case 2:
+
+        if(typeof pin === 'function') {
+          callback = pin;
+          pin = defaults.pin;
+        } else if (typeof pin === 'number') {
+          callback = function() {};
+        } else {
+          pin = defaults.pin;
+          callback = defaults.callback;
+        }
+
+      break;
+
+    }
+
     lastCodeSent = code;
+
     exec(path.join(__dirname, scripts.emit)+' '+pin+' '+code, function (error, stderr, stdout) {
-      
+
       callback(error, stderr, stdout);
-      
+
     });
-    
+
   }
-  
+
 };
