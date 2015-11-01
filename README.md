@@ -27,7 +27,7 @@ npm install rpi-433
 ### Usage
 Firstly, make sure you are running your application as root or with sudo, else the Raspberry Pi will not let you output/input to the GPIO and you'll get an error.
 ```bash
-sudo npm myscript.js
+sudo node myscript.js
 ```
 
 Please note that there are different and confusing ways to reference a channel. This module supports wPi schema. Once wiringPi is installed, in your CLI you can run `gpio readall` and check the wPi column or consult https://projects.drogon.net/raspberry-pi/wiringpi/pins/
