@@ -1,4 +1,5 @@
 var _               = require('underscore'),
+    Q               = require('q'),
     path            = require('path'),
     spawn           = require('child_process').spawn,
     exec            = require('child_process').exec,
@@ -56,10 +57,11 @@ module.exports = {
 
   sendCode: function (code, pin, callback) {
 
-    var defaults = {
-      pin: 0,
-      callback: function defaultCallback(){}
-    };
+    var deferred = Q.defer(),
+        defaults = {
+          pin: 0,
+          callback: function defaultCallback(){}
+        };
 
     switch(arguments.length) {
 
@@ -73,13 +75,19 @@ module.exports = {
       case 2:
 
         if(typeof pin === 'function') {
+          
           callback = pin;
           pin = defaults.pin;
+          
         } else if (typeof pin === 'number') {
+          
           callback = function() {};
+          
         } else {
+          
           pin = defaults.pin;
           callback = defaults.callback;
+          
         }
 
       break;
@@ -88,11 +96,21 @@ module.exports = {
 
     lastCodeSent = code;
 
-    exec(path.join(__dirname, scripts.emit)+' '+pin+' '+code, function (error, stderr, stdout) {
-
-      callback(error, stderr, stdout);
+    exec(path.join(__dirname, scripts.emit)+' '+pin+' '+code, function (error, stdout, stderr) {
+      
+      error = error || stderr;
+      
+      if(error) {
+        deferred.reject(error);
+      } else {
+        deferred.resolve(stdout);
+      }
+      
+      callback(error, stdout);
 
     });
+    
+    return deferred.promise;
 
   }
 

@@ -62,4 +62,13 @@ rfSend(code, pin);
 rfSend(code, callback);
 rfSend(code, pin, callback);
 */
+
+//rpi-433 uses the kriskowal's implementation of Promises so,
+//if you prefer Promises, you can also use this syntax :
+rfSend(1234, 0)
+  .then(function(stdout) {
+    console.log('Code sent: ', stdout);
+  }, function(error) {
+    console.log('Code was not sent, reason: ', error);
+  });
 ```
