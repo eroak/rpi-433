@@ -1,41 +1,46 @@
-/**
- * https://github.com/ninjablocks/433Utils
- *
- * PIN Schemas : https://projects.drogon.net/raspberry-pi/wiringpi/pins/
- */
 #include "RCSwitch.h"
 #include <stdlib.h>
 #include <stdio.h>
-     
-RCSwitch mySwitch;
+#include <string>
 
-
+bool eq(std::string s1, std::string c1, std::string c2) {
+  return s1.compare(c1) == 0 || s1.compare(c2) == 0;
+}
 
 int main(int argc, char *argv[]) {
   
-  int PIN = atoi(argv[1]);
-
-  if(wiringPiSetup() == -1)
-   return 0;
-
-  mySwitch = RCSwitch();
-  mySwitch.enableReceive(PIN);
+  //Programm Options
+  struct Options {
+    
+    int PIN;
+    
+    Options():  PIN(2)
+                {};
+    
+  } options;
+  
+  //If not available, exit
+  if(wiringPiSetup() == -1) {
+    return 0;
+  }
+  
+  //Get options
+  for (int i = 1; i < argc; i++) {
+        
+    if (eq(argv[i], "-p", "--pin") && argc > i+1) {
+      options.PIN = atoi(argv[i+1]);
+    }
+    
+  }
+     
+  RCSwitch mySwitch = RCSwitch();
+  mySwitch.enableReceive(options.PIN);
 
   while(1) {
 
     if (mySwitch.available()) {
-
-      int value = mySwitch.getReceivedValue();
-
-      if (value == 0) {
-        
-        printf("0");
       
-      } else {
-      
-        printf("%i", mySwitch.getReceivedValue());
-      
-      }
+      printf("{\"code\": %i, \"pulseLength\": %i}", mySwitch.getReceivedValue(), mySwitch.getReceivedDelay());
 
       fflush(stdout);
       mySwitch.resetAvailable();
@@ -44,6 +49,6 @@ int main(int argc, char *argv[]) {
 
   }
 
-  exit(0);
+  return 0;
 
 }

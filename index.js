@@ -13,31 +13,43 @@ var scripts = {
   emit: 'build/codesend',
 };
 
-var Sniffer = function(pin, debounceDelay) {
-
+var Sniffer = function(options) {
+  
   EventEmitter.call(this);
-
   var self = this;
-  var cmd = spawn(path.join(__dirname, scripts.read), [pin]);
+  
+  //Launch Sniffer
+  var snifferProcess = spawn(
+    path.join(__dirname, scripts.read), [
+    '--pin', options.pin
+  ]);
 
-  cmd.stdout.on('data', _.debounce(function (code) {
+  //Emit data received
+  snifferProcess.stdout.on('data', _.debounce(function (buffer) {
+    
+    var data = JSON.parse(buffer);
 
-    code = parseInt(code);
-
-    if(lastCodeSent == code) {
+    if(lastCodeSent == data.code) {
       lastCodeSent = null;
       return;
     }
+    console.log(data);
+    self.emit('data', data);
+    self.emit(data);
 
-    self.emit('codes', code);
-    self.emit(code);
+  }, options.debounceDelay, true));
 
-  }, debounceDelay, true));
-
-  cmd.stderr.on('data', function (error) {
+  //Emit error messages
+  snifferProcess.stderr.on('data', function (error) {
 
     self.emit('error', error);
 
+  });
+  
+  //Kill sniffer process when exit
+  process.on('SIGINT', function() {
+    snifferProcess.kill();
+    process.exit();
   });
 
 };
@@ -46,57 +58,113 @@ util.inherits(Sniffer, EventEmitter);
 
 module.exports = {
 
-  sniffer: function (pin, debounceDelay) {
+  /**
+   * Create an instance of the sniffer
+   *
+   * @param   options
+   *          options.pin             The pin on which to listen codes
+   *          options.debounceDelay   Delay before reading another code
+   *
+   * @return  Sniffer   Sniffer instance (singleton)
+   */
+  sniffer: function (options) {
 
-    pin = typeof pin !== 'undefined' ? pin : 2;
-    debounceDelay = typeof debounceDelay !== 'undefined' ? debounceDelay : 500;
-
-    return snifferInstance || (snifferInstance = new Sniffer(pin, debounceDelay));
+    _.defaults(options, {
+      pin: 2,
+      debounceDelay: 500
+    });
+    
+    return snifferInstance || (snifferInstance = new Sniffer(options));
 
   },
 
-  sendCode: function (code, pin, callback) {
+  /**
+   * Send a decimal code through 433Mhz (and return a promise).
+   *
+   * @param   code        Decimal code
+   * @param   [options]   Options to configure pin or pulseLength
+   *                      options.pin           Pin on which send the code
+   *                      options.pulseLength   Pulse length
+   * @param   [callback]  Callback(error, stdout)
+   * @return  Promise
+   */
+  sendCode: function (code, options, callback) {
 
     var deferred = Q.defer(),
         defaults = {
-          pin: 0,
-          callback: function defaultCallback(){}
+          code: 0,
+          options: {
+            pin: 0,
+            pulseLength: 350
+          },
+          callback: _.noop
         };
 
+    //Check arguments length
+    if(arguments.length === 0 || arguments.length > 3) {
+      return deferred.reject(new Error('Invalid parameters. sendCode(code, [options, callback])'));
+    }
+    
+    //Check if code is a number (and parse it)
+    code = parseInt(code);
+    if(!_.isNumber(code)) {
+      return deferred.reject(new Error('First parameter must be a integer'));   
+    }
+    
+    //Tidy up
     switch(arguments.length) {
-
+        
+      //function(code)
       case 1:
-
-        pin = defaults.pin;
+        
+        options = defaults.options;
         callback = defaults.callback;
 
       break;
 
+      //function(code, options || callback)
       case 2:
 
-        if(typeof pin === 'function') {
+        //function(code, callback)
+        if(_.isFunction(options)) {
           
-          callback = pin;
-          pin = defaults.pin;
+          callback = options;
+          options = defaults.options;
           
-        } else if (typeof pin === 'number') {
+        //function(code, options)
+        } else if (_.isObject(options)) {
           
-          callback = function() {};
+          _.defaults(options, defaults.options);
+          callback = defaults.callback;
           
+        //function(code, ???)
         } else {
           
-          pin = defaults.pin;
-          callback = defaults.callback;
+          return deferred.reject(new Error('Second parameter must be a function (callback) or an object (options)'));
           
         }
 
       break;
+      
+      //function(code, options, callback)
+      default:
+        
+        _.defaults(options, defaults.options);
+        
+      break;
 
     }
 
+    //To avoid to sniff this code that we are sending
     lastCodeSent = code;
 
-    exec(path.join(__dirname, scripts.emit)+' '+pin+' '+code, function (error, stdout, stderr) {
+    //Send the code
+    exec([
+      path.join(__dirname, scripts.emit),
+      '--code', code,
+      '--pin', options.pin,
+      '--pulse-length', options.pulseLength
+    ].join(' '), function (error, stdout, stderr) {
       
       error = error || stderr;
       
