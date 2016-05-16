@@ -41,32 +41,34 @@ gpio readall
 
 ```js
 var rpi433    = require('rpi-433'),
-    rfSniffer = rpi433.sniffer({  //Snif on GPIO 2 (or Physical PIN 13) with a 500ms debounce delay
-      pin: 2, 
-      debounceDelay: 500
+    rfSniffer = rpi433.sniffer({
+      pin: 2,                     //Snif on GPIO 2 (or Physical PIN 13)
+      debounceDelay: 500          //Wait 500ms before reading another code
     }),
-    rfSend    = rpi433.sendCode;
+    rfEmitter = rpi433.emitter({
+      pin: 0,                     //Send through GPIO 0 (or Physical PIN 11)
+      pulseLength: 350            //Send the code with a 350 pulse length
+    });
 
-// Receive    
+// Receive (data is like {code: xxx, pulseLength: xxx})
 rfSniffer.on('data', function (data) {
   console.log('Code received: '+data.code+' pulse length : '+data.pulseLength);
 });
 
 // Send
-rfSend(1234, {pin: 0, pulseLength: 350}, function(error, stdout) {   //Send 1234 through GPIO 0 (or Physical PIN 11)
+rfEmitter.sendCode(1234, function(error, stdout) {   //Send 1234
   if(!error) console.log(stdout); //Should display 1234
 });
 
-/*
-You can also use rfSend like that :
+/* Or :
 
-rfSend(code);
-rfSend(code, {
+rfEmitter.sendCode(code);
+rfEmitter.sendCode(code, {  //You can overwrite defaults options previously set (only for this sent)
   pin: 2,
   pulseLength: 350
 });
-rfSend(code, callback);
-rfSend(code, {
+rfEmitter.sendCode(code, callback);
+rfEmitter.sendCode(code, {
   pin: 2,
   pulseLength: 350
 }, callback);
@@ -74,7 +76,7 @@ rfSend(code, {
 
 //rpi-433 uses the kriskowal's implementation of Promises so,
 //if you prefer Promises, you can also use this syntax :
-rfSend(1234, {pin: 0})
+rfEmitter.sendCode(1234, {pin: 0})
   .then(function(stdout) {
     console.log('Code sent: ', stdout);
   }, function(error) {
